@@ -241,7 +241,7 @@ for col in outlier_columns:
         n_outliers = len(dataset) - len(dataset[col].dropna())
         print(f"Removed {n_outliers} outliers from {col} for label {label}")
         
-        
+       
 
 
 outliers_removed_df.to_pickle("/Users/bhaveshmankar/data-science-template/data/interim/02_outliers_removed_chauvenets.pkl")
