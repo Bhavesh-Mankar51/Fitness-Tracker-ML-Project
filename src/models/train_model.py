@@ -1,78 +1,54 @@
 import numpy as np
-import pandas as pd 
-from sklearn.model_selection import train_test_split 
-import matplotlib.pyplot as plt 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
     confusion_matrix,
 )
-import seaborn as sns 
+import seaborn as sns
 
 # Plot settings
 plt.style.use("fivethirtyeight")
-plt. rcParams ["figure.figsize"]
-plt. rcParams ["figure.dpi"] = 100
-plt. rcParams ["lines.linewidth"] = 2
-(20, 5)
+plt.rcParams["figure.figsize"] = (12, 6)
+plt.rcParams["figure.dpi"] = 100
+plt.rcParams["lines.linewidth"] = 2
 
-df = pd. read_pickle("/Users/bhaveshmankar/data-science-template/data/interim/03_data_features.pkl")
+# Load data
+df = pd.read_pickle("/Users/bhaveshmankar/data-science-template/data/interim/03_data_features.pkl")
 
-column_list = list(df.columns)
-print(column_list)
-
-df_train = df.drop( ["participant", "category", "set"], axis=1)
+# Prepare data
+df_train = df.drop(["participant", "category", "set"], axis=1)
 X = df_train.drop("label", axis=1)
-y = df_train ["label"]
+y = df_train["label"]
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.25, random_state=42, stratify=y
 )
-fig, ax = plt.subplots(figsize=(10, 5))
-df_train ["label"].value_counts().plot(
-    kind="bar", ax=ax, color="lightblue", label="Total"
-)
-y_train.value_counts().plot(kind="bar", ax=ax, color="dodgerblue", label="Train")
-y_test. value_counts().plot(kind="bar", ax=ax, color="royalblue", label="Test" )
-plt.legend()
-plt.show()
 
-
-basic_features = ["acc_x",
-"acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z"]
-square_features =["ace_r", "gyr_r"]
-pca_features = ["pca_1", "pca_2", "pca_ 3"]
-time_features = [f for f in df_train.columns if "_temp_" in f]
-freq_features = [f for f in df_train.columns if (("_freq" in f) or ("_pse" in f))]
-cluster_features = ["cluster"]
-print("Basic features:", len(basic_features))
-print("Square featuses:", len(square_features))
-print("PCA features:",len (pca_features) )
-print ("Time features:", len(time_features) )
-print ("Frequency features:", len(freq_features))
-print("Cluster features:", len(cluster_features))
-
-
-
+# ========== Decision Tree Classifier ==========
+print("\n================ Decision Tree ================\n")
 clf = DecisionTreeClassifier(
-    criterion="entropy",    # or "entropy"
-    max_depth=None,      # you can set e.g. 5 or None for no limit
-    min_samples_leaf=6,  # prevents overfitting
+    criterion="entropy",
+    max_depth=None,
+    min_samples_leaf=6,
     random_state=42,
 )
 clf.fit(X_train, y_train)
 
-y_pred = clf.predict(X_test)
-acc = accuracy_score(y_test, y_pred)
-print(f"Test Accuracy: {acc:.3f}\n")
-print("Classification Report:")
-print(classification_report(y_test, y_pred))
+y_pred_dt = clf.predict(X_test)
+acc_dt = accuracy_score(y_test, y_pred_dt)
+print(f"Decision Tree - Test Accuracy: {acc_dt:.3f}\n")
+print("Decision Tree - Classification Report:")
+print(classification_report(y_test, y_pred_dt))
 
-# 3) Confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
+cm_dt = confusion_matrix(y_test, y_pred_dt, labels=clf.classes_)
 fig, ax = plt.subplots(figsize=(8, 6))
 sns.heatmap(
-    cm,
+    cm_dt,
     annot=True,
     fmt="d",
     xticklabels=clf.classes_,
@@ -80,13 +56,12 @@ sns.heatmap(
     cmap="Blues",
     ax=ax,
 )
+ax.set_title("Decision Tree - Confusion Matrix")
 ax.set_xlabel("Predicted Label")
 ax.set_ylabel("True Label")
-ax.set_title("Confusion Matrix")
 plt.tight_layout()
 plt.show()
 
-# 4) Visualize the tree (first 3 levels)
 fig, ax = plt.subplots(figsize=(20, 10))
 plot_tree(
     clf,
@@ -100,3 +75,40 @@ plot_tree(
 )
 plt.title("Decision Tree (first 3 levels)")
 plt.show()
+
+
+print("\n================ Random Forest ================\n")
+rf_clf = RandomForestClassifier(
+    n_estimators=100,
+    criterion="entropy",
+    max_depth=None,
+    min_samples_leaf=6,
+    random_state=42,
+    n_jobs=-1,
+)
+rf_clf.fit(X_train, y_train)
+
+y_pred_rf = rf_clf.predict(X_test)
+acc_rf = accuracy_score(y_test, y_pred_rf)
+print(f"Random Forest - Test Accuracy: {acc_rf:.3f}\n")
+print("Random Forest - Classification Report:")
+print(classification_report(y_test, y_pred_rf))
+
+cm_rf = confusion_matrix(y_test, y_pred_rf, labels=rf_clf.classes_)
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(
+    cm_rf,
+    annot=True,
+    fmt="d",
+    xticklabels=rf_clf.classes_,
+    yticklabels=rf_clf.classes_,
+    cmap="Greens",
+    ax=ax,
+)
+ax.set_title("Random Forest - Confusion Matrix")
+ax.set_xlabel("Predicted Label")
+ax.set_ylabel("True Label")
+plt.tight_layout()
+plt.show()
+
+

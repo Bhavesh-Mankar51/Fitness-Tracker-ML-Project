@@ -53,9 +53,19 @@ LowPass = LowPassFilter()
 
 
 fs = 1000 / 200
-cutoff = 1.2
+cutoff = 1
 
 # Apply lowpass filter to all columns
+# df_lowpass = LowPass.low_pass_filter(df_lowpass, "acc_y", fs, cutoff, order=5)
+
+# subset = df_lowpass[df_lowpass["set"] == 45]
+# print(subset["label"][0])
+
+# fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(20,10))
+# ax[0].plot(subset["acc_y"].reset_index(drop=True), label = "raw data")
+# ax[1].plot(subset["acc_y_lowpass"].reset_index(drop=True), label = "butterworth_filter")
+# ax[0].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), fancybox=True, shadow=True)
+# ax[1].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), fancybox=True, shadow=True)
 
 
 for col in predictor_columns:
